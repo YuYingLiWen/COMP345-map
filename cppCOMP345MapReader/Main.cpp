@@ -1,5 +1,4 @@
 #include <iostream>
-#include <thread>
 #include <string>
 
 #include "MapLoader.h"
@@ -18,7 +17,7 @@ int main() {
 	bool run = true;
 
 	while (run) {
-
+		bool error = false;
 		try {
 			int map;
 			do {
@@ -32,6 +31,8 @@ int main() {
 					map = -1;
 				}
 			} while (map > 7 || map < 0);
+
+			
 
 			switch (map)
 			{
@@ -66,23 +67,18 @@ int main() {
 			case 0:
 				run = false;
 				break;
-
-			default:
-				std::cout << "asdfqweroqiwueorpqwer." << std::endl;
-
-				break;
 			}
 		}
 		catch (std::runtime_error e) {
 			std::cout << "ERROR: " << e.what() << std::endl;
-			Map::get_instance()->unload();
+			error = true;
 		}
 
-		if (run) {
+		if (run && !error) {
 			Map::get_instance()->display();
 			Map::get_instance()->validate();
-			Map::get_instance()->unload();
 		}
+		Map::get_instance()->unload();
 	}
 
 	return 0;

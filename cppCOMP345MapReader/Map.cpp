@@ -16,60 +16,51 @@ Map* Map::get_instance() {
 
 void Map::set_continent(Continent& new_continent) {
 
-	//if (_continents == nullptr) {
-	//	std::cout << "new cont" << std::endl;
-	//	_continents = new std::list<Continent*>();
-	//} 
-	std::cout << "Countirasdf " << (_countries == nullptr) << std::endl;
-
 	_continents->push_back(&new_continent);
 }
 
 void Map::set_country(int& continent_index, Country& new_country) {
 
-	/*if (_countries == nullptr) 
-	{
-		std::cout << "new contry" << std::endl;
-		_countries = new std::vector<Country*>();
-	}*/
+	try {
+		bool found = false;
 
-	std::cout << "Countirasasdfasdfasdfasdfdf " << continent_index << std::endl;
-
-	bool found = false;
-	std::cout << "Cousdfasdfdf "<< std::endl;
-
-	for (Continent* continent : get_continents()) {
-		if (continent_index == continent->get_index()) {
-			found = true;
-			get_countries().push_back(&new_country);
-			continent->add_country(new_country);
+		for (Continent* continent : get_continents()) {
+			if (continent_index == continent->get_index()) {
+				found = true;
+				get_countries().push_back(&new_country);
+				continent->add_country(new_country);
+			}
 		}
+		if (!found) throw std::runtime_error(" Fail to find continent: " + continent_index);
 	}
-	
-
-	if (!found) throw new std::runtime_error("Fail to find continent: " + continent_index);
+	catch (std::runtime_error e) {
+		throw e;
+	}
 }
 
 void Map::set_border(std::vector<std::string> splited_borders) {
 
-	int curr_country_index = stoi(splited_borders[0]) - 1;
+	try {
+		int curr_country_index = stoi(splited_borders[0]) - 1;
 
-	for (size_t i = 1; i < splited_borders.size(); i++) { // 0 is the current selected country the remainig are its neighbours
+		for (size_t i = 1; i < splited_borders.size(); i++) { // 0 is the current selected country the remainig are its neighbours
 
-		Country* country = get_country(stoi(splited_borders[i]));
+			Country* country = get_country(stoi(splited_borders[i]));
 
-		if (country) {
-			get_countries()[curr_country_index]->set_neighbor(*country);
+			if (country) {
+				get_countries()[curr_country_index]->set_neighbor(*country);
+			}
+			else {
+				throw new std::runtime_error("Country not found for " + (curr_country_index + 1));
+			}
 		}
-		else {
-			throw new std::runtime_error("Country not found for " + (curr_country_index + 1) );
-		}
+	}
+	catch(std::runtime_error e) {
+		throw e;
 	}
 }
 
 bool Map::validate() {
-
-	std::cout << "-- VALIDATING --\n" << std::endl;
 
 	std::queue<Country*> queue;
 
@@ -86,8 +77,7 @@ bool Map::validate() {
 bool Map::help_validate(std::queue<Country*>& to_be_visited, int& size, int& count) {
 	
 	if (to_be_visited.size() <= 0) {
-		std::cout << count << std::endl;
-		std::cout << "\n-- VALIDATING END --" << std::endl;
+		std::cout << "\n-- MAP VALIDATION PASS: " << count << std::endl;
 
 		if (size == count) return true;
 		return false;
@@ -150,22 +140,15 @@ std::vector<Country*>& Map::get_countries(){
 
 void Map::unload() {
 	
+	if (get_continents().size() <= 0 && get_countries().size() <= 0) return;
+
 	std::cout << "\n-- UNLOADING --\n" << std::endl;
 
-	for (Continent* c : get_continents()) {
-		delete c;
-		c = nullptr;
-	}
-
-	for (Country* c : get_countries()) {
-		delete c;
-		c = nullptr;
-	}
+	for (Continent* c : get_continents()) delete c;
+	for (Country* c : get_countries()) delete c;
 
 	_continents->clear();
 	_countries->clear();
-
-	std::cout << _countries->size() << _continents->size() << std::endl;
 
 	std::cout << "\n-- UNLOADING END --\n" << std::endl;
 }

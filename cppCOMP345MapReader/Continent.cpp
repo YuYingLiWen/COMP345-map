@@ -44,6 +44,8 @@ std::string Continent::get_color() {
 Continent::~Continent() {
 	std::cout << "Unloaded:\t" << typeid(Continent).name() << "\t\t" << Territory::get_name() << std::endl;
 
+	_continent_index = 0;
+
 	delete _color_ptr;
 	delete _army_value_ptr;
 	delete _countries;

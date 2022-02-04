@@ -11,11 +11,8 @@ void MapLoader::load_map(std::string map_file_name){
 
 	map_file_name = "resources/" + map_file_name + ".map";
 
-	if (!verify(map_file_name)) {
+	if (!verify(map_file_name)) return; // Map fails basic verifications
 
-		return;
-		 // Map fails basic verifications
-	}
 
 	try {
 		std::ifstream reader(map_file_name);
@@ -128,8 +125,6 @@ void MapLoader::make_continent(std::vector<std::string> line_tokens) {
 }
 
 void MapLoader::make_countries(std::vector<std::string> line_tokens) {
-	//std::cout << "asdfa" << std::endl;
-	for (std::string s : line_tokens) std::cout << s << std::endl;
 
 	try {
 		std::string* country_name = new std::string(line_tokens[1]);
@@ -139,9 +134,6 @@ void MapLoader::make_countries(std::vector<std::string> line_tokens) {
 
 		int* country_index_ptr = new int(stoi(line_tokens[0]));
 		int* continent_index_ptr = new int(stoi(line_tokens[2]));
-
-		std::cout << (Map::get_instance() == nullptr) << std::endl;
-
 
 		Country* new_country = new Country(*country_index_ptr, *country_name);
 		Map::get_instance()->set_country(*continent_index_ptr, *new_country);
