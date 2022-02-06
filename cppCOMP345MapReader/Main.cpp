@@ -75,10 +75,14 @@ int main() {
 		}
 
 		if (run && !error) {
-			Map::get_instance()->display();
+
+			std::cout << *Map::get_instance();
+			//Map::get_instance()->display();
 			Map::get_instance()->validate();
 		}
+
 		Map::get_instance()->unload();
+
 	}
 
 	return 0;

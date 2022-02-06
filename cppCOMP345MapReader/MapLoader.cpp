@@ -1,10 +1,18 @@
 #include "MapLoader.h"
 
-MapLoader* MapLoader::_instance = nullptr;
+#include <iostream>
+#include <fstream>
+
+
+MapLoader* MapLoader::_instance_ptr = nullptr;
 
 
 MapLoader::MapLoader() {
 	// Empty - see instance
+}
+
+MapLoader::MapLoader(const MapLoader&  to_copy) {
+	_instance_ptr = to_copy.get_instance();
 }
 
 void MapLoader::load_map(std::string map_file_name){
@@ -83,29 +91,30 @@ void MapLoader::sort_map_file_data(FileBlock &fileBlock, std::string &line)  {
 }
 
 MapLoader* MapLoader::get_instance() {
-	if (_instance == nullptr) {
-		_instance = new MapLoader();
+	if (_instance_ptr == nullptr) {
+		_instance_ptr = new MapLoader();
 	}
-	return _instance;
+	return _instance_ptr;
 }
 
-std::vector<std::string> MapLoader::split(std::string &line) const {
-	std::vector<std::string> tokens;
+std::vector<std::string>& MapLoader::split(std::string& line) const {
+	std::vector<std::string>* tokens = new std::vector<std::string>();
 
 	size_t start = 0;
 	for (size_t i = 0; i < line.size(); i++) {
 		if (line[i] == ' ') {
-			tokens.push_back(line.substr(start, i - start));
+			(*tokens).push_back(line.substr(start, i - start));
 			start = i + 1;
 		}
 		else if (i == line.size() - 1) {
-			tokens.push_back(line.substr(start, i - start + 1));
+			(*tokens).push_back(line.substr(start, i - start + 1));
 		}
 	}
-	return tokens;
+
+	return *tokens;
 }
 
-void MapLoader::make_continent(std::vector<std::string> line_tokens) {
+void MapLoader::make_continent(std::vector<std::string>& line_tokens) {
 
 	try {
 
@@ -120,11 +129,14 @@ void MapLoader::make_continent(std::vector<std::string> line_tokens) {
 		Map::get_instance()->set_continent(*new_continent);
 	}
 	catch (std::runtime_error e) {
+		delete& line_tokens;
 		throw e;
 	}
+
+	delete& line_tokens;
 }
 
-void MapLoader::make_countries(std::vector<std::string> line_tokens) {
+void MapLoader::make_countries(std::vector<std::string>& line_tokens) {
 
 	try {
 		std::string* country_name = new std::string(line_tokens[1]);
@@ -139,11 +151,14 @@ void MapLoader::make_countries(std::vector<std::string> line_tokens) {
 		Map::get_instance()->set_country(*continent_index_ptr, *new_country);
 	}
 	catch (std::runtime_error e) {
+		delete& line_tokens;
 		throw e;
 	}
+
+	delete& line_tokens;
 }
 
-void MapLoader::assign_borders(std::vector<std::string> line_tokens) { 
+void MapLoader::assign_borders(std::vector<std::string>& line_tokens) { 
 
 	try {
 		for (std::string& s : line_tokens) if (!is_number(s)) throw new std::runtime_error("Border is not of type int: " + s);
@@ -151,8 +166,10 @@ void MapLoader::assign_borders(std::vector<std::string> line_tokens) {
 		Map::get_instance()->set_border(line_tokens);
 	}
 	catch (std::runtime_error const& e) {
+		delete& line_tokens;
 		throw e;
 	}
+	delete& line_tokens;
 }
 
 bool MapLoader::verify(std::string map_file_name) {
@@ -192,6 +209,18 @@ bool MapLoader::is_number(std::string& str) {
 	return true;
 }
 
+MapLoader& MapLoader::operator=(const MapLoader& loader) {
+	_instance_ptr = loader.get_instance();
+	return *_instance_ptr;
+}
+
+
 MapLoader::~MapLoader() {
-	delete _instance;
+	delete _instance_ptr;
+}
+
+
+std::ostream& operator<<(std::ostream stream, MapLoader& loader) {
+	stream << "Map loader stream. Nothing else to display.\n";
+	return stream;
 }

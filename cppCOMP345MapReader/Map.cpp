@@ -1,10 +1,17 @@
 #include "Map.h"
 
+#include <iostream>
+
+
 Map* Map::_instance = nullptr;
 
 Map::Map() {
-	_continents = new std::list<Continent*>();
-	_countries = new std::vector<Country*>();
+	_continents_ptr = new std::list<Continent*>();
+	_countries_ptr = new std::vector<Country*>();
+}
+
+Map::Map(const Map& to_copy) {
+	_instance = to_copy.get_instance();
 }
 
 Map* Map::get_instance() {
@@ -16,7 +23,7 @@ Map* Map::get_instance() {
 
 void Map::set_continent(Continent& new_continent) {
 
-	_continents->push_back(&new_continent);
+	_continents_ptr->push_back(&new_continent);
 }
 
 void Map::set_country(int& continent_index, Country& new_country) {
@@ -60,7 +67,7 @@ void Map::set_border(std::vector<std::string> splited_borders) {
 	}
 }
 
-bool Map::validate() {
+bool Map::validate(){
 
 	std::queue<Country*> queue;
 
@@ -68,7 +75,7 @@ bool Map::validate() {
 
 	get_countries()[0]->set_visited(*new bool(true));
 
-	int size = get_countries().size();
+	int size = (int)(get_countries().size());
 	int count = 0;
 
 	return help_validate(queue, size, count);
@@ -108,13 +115,13 @@ bool Map::help_validate(std::queue<Country*>& to_be_visited, int& size, int& cou
 	return help_validate(to_be_visited, size, ++count);
 }
 
-void Map::display() {
+void Map::display() const {
 
-	if (_continents->size() == 0 && _countries->size() == 0) return;
+	if (_continents_ptr->size() == 0 && _countries_ptr->size() == 0) return;
 
 	std::cout << "-- DISPLAY --\n" << std::endl;
 
-	for (Continent* continent : *_continents) {
+	for (Continent* continent : *_continents_ptr) {
 		std::cout << continent->to_string() << std::endl;
 	}
 
@@ -130,12 +137,12 @@ Country* Map::get_country(int index) {
 	return nullptr;
 }
 
-std::list<Continent*>& Map::get_continents() {
-	return *_continents;
+std::list<Continent*>& Map::get_continents() const {
+	return *_continents_ptr;
 }
 
-std::vector<Country*>& Map::get_countries(){
-	return *_countries;
+std::vector<Country*>& Map::get_countries() const {
+	return *_countries_ptr; 
 }
 
 void Map::unload() {
@@ -147,14 +154,33 @@ void Map::unload() {
 	for (Continent* c : get_continents()) delete c;
 	for (Country* c : get_countries()) delete c;
 
-	_continents->clear();
-	_countries->clear();
+	_continents_ptr->clear();
+	_countries_ptr->clear();
 
 	std::cout << "\n-- UNLOADING END --\n" << std::endl;
+}
+
+Map& Map::operator=(const Map& map) {
+	_instance = map.get_instance();
+	return *this;
 }
 
 Map::~Map() {
 	unload();
 
 	delete _instance;
+}
+
+
+std::ostream& operator<<(std::ostream& stream, Map& map) {
+
+	stream << "-- DISPLAY --\n\n";
+
+	for (Continent* continent : map.get_continents()) {
+		stream << continent->to_string() << std::endl;
+	}
+
+	stream << "-- DISPLAY END --\n\n";
+
+	return stream;
 }
